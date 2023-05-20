@@ -1,0 +1,53 @@
+---
+
+- name: "Install | Install required packages"
+  become: true
+  ansible.builtin.apt:
+    name: "{{ pihole_required_packages }}"
+    update_cache: true
+    state: present
+  notify:
+    - "Handlers | pihole | Restart lighttpd service"
+    - "Handlers | pihole | Restart unbound service"
+
+- name: "Main | Ensure unbound installation"
+  ansible.builtin.import_tasks: unbound.yml
+
+- name: "Install | Ensure piHole config directory"
+  become: true
+  ansible.builtin.file:
+    path: "{{ pihole_config_directory }}"
+    mode: "0775"
+    state: directory
+
+- name: "Install | Template piHole install config"
+  become: true
+  ansible.builtin.blockinfile:
+    block: "{{ lookup('template', 'pihole/setupVars.conf.j2') }}"
+    dest: "{{ pihole_config_directory }}/setupVars.conf"
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify: "Handlers | pihole | Restart FTL service"
+
+- name: "Install | Check if piHole is installed"
+  ansible.builtin.stat:
+    path: "{{ pihole_local_repository }}"
+  register: _pihole_installed
+
+- name: "Install | Ensure piHole is installed"
+  when: not _pihole_installed.stat.exists
+  block:
+    - name: "Install | Download install script"
+      delegate_to: localhost
+      ansible.builtin.get_url:
+        url: "{{ pihole_install_script_url }}"
+        dest: "{{ pihole_install_script_path }}"
+        mode: '0644'
+      notify: "Handlers | pihole | Cleanup install script"
+
+    - name: "Install | Run install script"
+      become: true
+      ansible.builtin.script:
+        cmd: "{{ pihole_install_script_path }} --unattended"

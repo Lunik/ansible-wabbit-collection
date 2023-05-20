@@ -1,0 +1,67 @@
+---
+
+- name: "Package | apt | Handle Debian family"
+  when: ansible_facts.os_family == "Debian"
+  block:
+    - name: "Package | apt | Update cache"
+      become: true
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: "Package | apt | Install required packages"
+      become: true
+      ansible.builtin.apt:
+        name: "{{ base_apt_packages }}"
+        state: present
+
+    - name: "Package | apt | List upgradable packages"
+      check_mode: true
+      ansible.builtin.apt:
+        name: '*'
+        state: latest
+      register: _base_package_upgrade_list
+
+    - name: "Package | apt | Display upgradable packages"
+      ansible.builtin.debug:
+        var: _base_package_upgrade_list.stdout_lines
+      when: _base_package_upgrade_list.changed
+
+    - name: "Package | apt | Upgrade packages"
+      become: true
+      ansible.builtin.apt:
+        name: '*'
+        state: latest
+      when: _base_package_upgrade_list.changed and base_package_upgrade
+
+- name: "Package | apt | Handle RedHat family"
+  when: ansible_facts.os_family == "RedHat"
+  block:
+    - name: "Package | dnf | Update cache"
+      become: true
+      ansible.builtin.dnf:
+        update_cache: true
+
+    - name: "Package | dnf | Install required packages"
+      become: true
+      ansible.builtin.dnf:
+        name: "{{ base_dnf_packages }}"
+        state: present
+
+    - name: "Package | dnf | List upgradable packages"
+      check_mode: true
+      ansible.builtin.dnf:
+        name: '*'
+        state: latest
+      register: _base_package_upgrade_list
+
+    - name: "Package | dnf | Display upgradable packages"
+      ansible.builtin.debug:
+        var: _base_package_upgrade_list.stdout_lines
+      when: _base_package_upgrade_list.changed
+
+    - name: "Package | dnf | Upgrade packages"
+      become: true
+      ansible.builtin.dnf:
+        name: '*'
+        state: latest
+      when: _base_package_upgrade_list.changed and base_package_upgrade

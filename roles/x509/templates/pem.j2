@@ -1,0 +1,4 @@
+{{ lookup('file', _x509_org_app_cert_path + '.cert') }}
+{{ lookup('pipe', 'echo "' + x509_org_app_cert.key_passphrase + '" | openssl rsa -in ' + _x509_org_app_cert_path + '.key -passin stdin') }}
+{{ lookup('file', _x509_org_app_ca.cert_path) }}
+{{ lookup('file', x509_org_root_ca_cert_path) }}

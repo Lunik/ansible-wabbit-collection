@@ -1,0 +1,5 @@
+{% for entry in pihole_dns_entries %}
+{% if entry.type in ["A", "AAAA"] %}
+{{ entry.ip | lower }} {{ entry.domain | lower }}
+{% endif %}
+{% endfor %}

@@ -1,0 +1,3 @@
+{% for lease in pihole_dhcp_static_leases %}
+dhcp-host={{ lease.mac_addr | upper }},{{ lease.ip }},{{ lease.hostname }}
+{% endfor %}

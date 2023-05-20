@@ -1,0 +1,57 @@
+---
+
+- name: "Unbound | Download root hints"
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ pihole_unbound_root_hints_url }}"
+    checksum: "md5:{{ pihole_unbound_root_hints_url }}.md5"
+    dest: "{{ pihole_unbound_root_hints_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: "Handlers | pihole | Restart unbound service"
+
+- name: "Unbound | Ensure log folder"
+  become: true
+  ansible.builtin.file:
+    path: "{{ pihole_unbound_log_directory }}"
+    owner: unbound
+    group: unbound
+    mode: '0750'
+    state: directory
+
+- name: "Unbound | Template pihole configs"
+  become: true
+  ansible.builtin.template:
+    src: unbound/pi-hole.conf.j2
+    dest: "{{ pihole_unbound_config_directory }}/pi-hole.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: "Handlers | pihole | Restart unbound service"
+
+- name: "Unbound | Disable unbound-resolvconf service"
+  become: true
+  ansible.builtin.systemd:
+    name: unbound-resolvconf.service
+    state: stopped
+    enabled: false
+  notify: "Handlers | pihole | Restart unbound service"
+
+- name: "Unbound | Disable unbound resolv.conf config"
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/resolvconf.conf
+    regexp: '^unbound_conf='
+    line: '#unbound_conf='
+  notify: "Handlers | pihole | Restart unbound service"
+
+- name: "Unbound | Remove unbound resolvconf_resolvers.conf config"
+  become: true
+  ansible.builtin.file:
+    path: "{{ pihole_unbound_config_directory }}/resolvconf_resolvers.conf"
+    state: absent
+  notify: "Handlers | pihole | Restart unbound service"
+
+- name: "Unbound | Flush handlers"
+  ansible.builtin.meta: flush_handlers

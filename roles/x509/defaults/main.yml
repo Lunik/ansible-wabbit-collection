@@ -1,0 +1,34 @@
+---
+# defaults file for x509_org
+
+# Global org configuration
+# x509_org_country_name:
+# x509_org_email_address:
+# x509_org_locality_name:
+# x509_org_organization_name:
+
+# Global technical configuration
+x509_org_rsa_key_size: 4096
+
+# Configure here where to store the resulted root CA ressources
+# x509_org_root_ca_key_path:
+# x509_org_root_ca_key_passphrase:
+# x509_org_root_ca_cert_path:
+x509_org_root_ca_cert_expiration: +3650d # In days (+365d)
+
+# Configure here where to store the resulted intermediate CA ressources
+x509_org_intermediate_ca: []
+#  - name: app
+#    key_path:
+#    key_passphrase:
+#    cert_path:
+#    cert_expiration: +750d # In days (+365d)
+
+# Configure here where to store the resulted app ressources
+# x509_app_certificates_path:
+x509_app_certificates: []
+#  - common_name: example.org
+#    ca: app
+#    expiration: +365d
+#    alt_names:
+#      - exemple.fr

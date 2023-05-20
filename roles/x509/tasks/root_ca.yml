@@ -1,0 +1,65 @@
+---
+
+- name: "Root_ca | Create directories"
+  ansible.builtin.file:
+    path: "{{ item | dirname }}"
+    mode: '0700'
+    state: directory
+  loop:
+    - "{{ x509_org_root_ca_key_path }}"
+    - "{{ x509_org_root_ca_cert_path }}"
+
+- name: "Root_ca | Generate root CA key"
+  no_log: true
+  community.crypto.openssl_privatekey:
+    path: "{{ x509_org_root_ca_key_path }}"
+    passphrase: "{{ x509_org_root_ca_key_passphrase }}"
+    size: "{{ x509_org_rsa_key_size }}"
+    cipher: auto
+    backup: true
+    mode: '0600'
+    state: present
+
+- name: "Root_ca | Generate root CA csr"
+  community.crypto.openssl_csr:
+    path: "{{ x509_org_root_ca_cert_path }}.csr"
+    privatekey_path: "{{ x509_org_root_ca_key_path }}"
+    privatekey_passphrase: "{{ x509_org_root_ca_key_passphrase }}"
+    common_name: "{{ x509_org_organization_name | lower }}"
+    country_name: "{{ x509_org_country_name }}"
+    email_address: "{{ x509_org_email_address }}"
+    locality_name: "{{ x509_org_locality_name }}"
+    organization_name: "{{ x509_org_organization_name }}"
+    basic_constraints_critical: true
+    basic_constraints:
+      - CA:TRUE
+      - pathlen:1
+    key_usage_critical: true
+    key_usage:
+      - keyCertSign
+    mode: '0600'
+    state: present
+
+- name: "Root_ca | Check if root CA cert exists"
+  ansible.builtin.stat:
+    path: "{{ x509_org_root_ca_cert_path }}"
+  register: _x509_org_root_ca_cert_stat
+
+- name: "Root_ca | Check if root cert CA is expired"
+  community.crypto.x509_certificate_info:
+    path: "{{ x509_org_root_ca_cert_path }}"
+  register: _x509_org_root_ca_cert_info
+  when: _x509_org_root_ca_cert_stat.stat.exists
+
+- name: "Root_ca | Generate root CA cert"
+  community.crypto.x509_certificate:
+    path: "{{ x509_org_root_ca_cert_path }}"
+    privatekey_path: "{{ x509_org_root_ca_key_path }}"
+    privatekey_passphrase: "{{ x509_org_root_ca_key_passphrase }}"
+    csr_path: "{{ x509_org_root_ca_cert_path }}.csr"
+    provider: selfsigned
+    selfsigned_not_after: "{{ x509_org_root_ca_cert_expiration }}"
+    force: "{{ _x509_org_root_ca_cert_info.expired | default(false) }}"
+    mode: '0600'
+    backup: true
+    state: present

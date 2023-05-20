@@ -1,0 +1,23 @@
+---
+# defaults file for base
+
+# Global config
+# User to configure (ssh keys for exemple)
+# base_user:
+# Upgrade all packages when running the role
+base_package_upgrade: false
+
+# SSH key config
+# Add SSH Key to authorized_keys
+# Path of the SSH Key on the Ansible server
+# base_ssh_key_path:
+
+# Pi config
+# Raspberry PI wireless configuration (with rfkill)
+# The remote server should be in an Ansible group named 'pi'
+# State could be : blocked or unblocked
+base_pi_rf_device_state:
+  # Wifi
+  wlan: blocked
+  # Bluetooh
+  bluetooth: blocked

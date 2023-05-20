@@ -1,0 +1,66 @@
+---
+
+# https://docs.pi-hole.net/database/gravity/#adlist-table-adlist
+- name: "Config | Gravity | Get adlists in database"
+  become: true
+  ansible.builtin.command:
+    cmd: >
+      {{ pihole_sqlite3 }}
+      {{ pihole_config_directory }}/gravity.db
+      "select json_group_array(json_object('address', address, 'comment', comment)) from adlist;"
+  changed_when: false
+  register: _pihole_gravity_adlists_raw
+
+- name: "Config | Gravity | Parse adlists list"
+  ansible.builtin.set_fact:
+    _pihole_gravity_adlists: "{{ _pihole_gravity_adlists_raw.stdout | from_json }}"
+  changed_when: false
+
+- name: "Config | Gravity | Insert or update adlist in the database"
+  become: true
+  ansible.builtin.command:
+    cmd: >
+      {{ pihole_sqlite3 }}
+      {{ pihole_config_directory }}/gravity.db
+      "DELETE FROM adlist WHERE address='{{ adlist }}'; INSERT INTO adlist(address, comment) VALUES('{{ adlist }}', '{{ pihole_gravity_comment }}');"
+  changed_when: true
+  loop: "{{ pihole_adlists }}"
+  loop_control:
+    loop_var: adlist
+  when: |
+    (_pihole_gravity_adlists | selectattr('address', '==', adlist) | length) == 0
+    or (_pihole_gravity_adlists | selectattr('address', '==', adlist) | first).comment != pihole_gravity_comment
+  notify: "Handlers | pihole | Update gravity"
+
+# https://docs.pi-hole.net/database/gravity/#domain-tables-domainlist
+- name: "Config | Gravity | Get domains in database"
+  become: true
+  ansible.builtin.command:
+    cmd: >
+      {{ pihole_sqlite3 }}
+      {{ pihole_config_directory }}/gravity.db
+      "select json_group_array(json_object('type', type, 'domain', domain, 'comment', comment)) from domainlist;"
+  changed_when: false
+  register: _pihole_gravity_domains_raw
+
+- name: "Config | Gravity | Parse domains list"
+  ansible.builtin.set_fact:
+    _pihole_gravity_domains: "{{ _pihole_gravity_domains_raw.stdout | from_json }}"
+  changed_when: false
+
+- name: "Config | Gravity | Insert or update domain in the database"
+  become: true
+  ansible.builtin.command:
+    cmd: >
+      {{ pihole_sqlite3 }}
+      {{ pihole_config_directory }}/gravity.db
+      "DELETE FROM domainlist WHERE domain='{{ domain.domain }}'; INSERT INTO domainlist(type, domain, comment) VALUES({{ domain.type }}, '{{ domain.domain }}', '{{ pihole_gravity_comment }}');"
+  changed_when: true
+  loop: "{{ pihole_domainlist }}"
+  loop_control:
+    loop_var: domain
+  when: |
+    (_pihole_gravity_domains | selectattr('domain', '==', domain.domain) | length) == 0
+    or (_pihole_gravity_domains | selectattr('domain', '==', domain.domain) | first).type != domain.type
+    or (_pihole_gravity_domains | selectattr('domain', '==', domain.domain) | first).comment != pihole_gravity_comment
+  notify: "Handlers | pihole | Update gravity"

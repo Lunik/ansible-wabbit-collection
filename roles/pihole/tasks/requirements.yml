@@ -1,0 +1,12 @@
+---
+
+- name: "Requirements | Configure static IP"
+  become: true
+  ansible.builtin.blockinfile:
+    block: |
+      interface eth0
+      static ip_address={{ pihole_static_ip.ip_address }}/{{ pihole_static_ip.subnet_mask }}
+      static routers={{ pihole_static_ip.routers }}
+      static domain_name_servers={{ pihole_static_ip.domain_name_servers }}
+    dest: "{{ pihole_dhcpcd_config }}"
+  notify: "Handlers | pihole | Restart DHCPCD service"

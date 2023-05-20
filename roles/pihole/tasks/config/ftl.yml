@@ -1,0 +1,11 @@
+---
+
+- name: "Config | FTL | Template piHole-FTL config"
+  become: true
+  ansible.builtin.template:
+    src: pihole/pihole-FTL.conf.j2
+    dest: "{{ pihole_config_directory }}/pihole-FTL.conf"
+    owner: "{{ pihole_system_user }}"
+    group: "{{ pihole_system_user }}"
+    mode: "0644"
+  notify: "Handlers | pihole | Restart FTL service"

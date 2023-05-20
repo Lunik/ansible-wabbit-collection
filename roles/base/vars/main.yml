@@ -1,0 +1,14 @@
+---
+# vars file for base
+
+base_pi_rfkill_bin: /usr/sbin/rfkill
+
+base_apt_packages:
+  - vim
+  - htop
+  - git
+
+base_dnf_packages:
+  - vim
+  - htop
+  - git

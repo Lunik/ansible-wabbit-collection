@@ -1,0 +1,20 @@
+---
+
+- name: "Config | DNS Entries | Template dnsmaq config"
+  become: true
+  ansible.builtin.template:
+    src: "{{ config.src }}"
+    dest: "{{ config.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: "Handlers | pihole | Restart FTL service"
+  loop:
+    - src: pihole/dnsmasq/05-pihole-custom-cname.conf.j2
+      dest: "{{ pihole_dnsmasq_config_directory }}/05-pihole-custom-cname.conf"
+    - src: pihole/dnsmasq/99-edns.conf.j2
+      dest: "{{ pihole_dnsmasq_config_directory }}/99-edns.conf"
+    - src: pihole/dnsmasq/custom.list.j2
+      dest: "{{ pihole_config_directory }}/custom.list"
+  loop_control:
+    loop_var: config

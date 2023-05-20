@@ -1,0 +1,17 @@
+---
+# tasks file for x509_org
+
+- name: "Main | Ensure root CA exists"
+  ansible.builtin.import_tasks: root_ca.yml
+
+- name: "Main | Ensure intermediate CA exists"
+  ansible.builtin.include_tasks: intermediate_ca.yml
+  loop: "{{ x509_org_intermediate_ca }}"
+  loop_control:
+    loop_var: x509_org_intermediate_ca_cert
+
+- name: "Main | Ensure app certs exists"
+  ansible.builtin.include_tasks: app_cert.yml
+  loop: "{{ x509_app_certificates }}"
+  loop_control:
+    loop_var: x509_org_app_cert

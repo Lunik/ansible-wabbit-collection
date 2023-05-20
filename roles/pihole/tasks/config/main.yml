@@ -1,0 +1,16 @@
+---
+
+- name: "Config | Ensure piHole-FTL config"
+  ansible.builtin.import_tasks: ftl.yml
+
+- name: "Config | Ensure gravity config"
+  ansible.builtin.import_tasks: gravity.yml
+
+- name: "Config | Ensure piHole web config"
+  ansible.builtin.import_tasks: web.yml
+
+- name: "Config | Ensure custom DNS entries"
+  ansible.builtin.import_tasks: dns.yml
+
+- name: "Config | Ensure custom DHCP leases"
+  ansible.builtin.import_tasks: dhcp.yml

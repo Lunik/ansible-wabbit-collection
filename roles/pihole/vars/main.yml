@@ -1,0 +1,43 @@
+---
+# vars file for pihole
+
+pihole_required_packages:
+  - lighttpd-mod-openssl
+  - sqlite3
+  - unbound
+
+pihole_install_script_url: https://install.pi-hole.net
+pihole_install_script_path: /tmp/pihole-basic-install.sh
+
+pihole_local_repository: /etc/.pihole
+pihole_config_directory: /etc/pihole
+
+pihole_system_user: pihole
+
+pihole_ftl_service: pihole-FTL
+pihole_lighttpd_service: lighttpd
+pihole_dhcpcd_service: dhcpcd
+pihole_unbound_service: unbound
+
+pihole_binary: /usr/local/bin/pihole
+pihole_sqlite3: /usr/bin/sqlite3
+
+pihole_cert_path: "/etc/lighttpd/tls/{{ pihole_hostname }}.pem"
+pihole_ca_path: /etc/lighttpd/tls/rootCA.cert
+
+pihole_webserver_group: www-data
+
+pihole_lighttpd_config_directory: /etc/lighttpd
+
+pihole_api_login: admin/login.php
+
+pihole_dnsmasq_config_directory: /etc/dnsmasq.d
+
+pihole_dhcpcd_config: /etc/dhcpcd.conf
+
+pihole_unbound_root_hints_url: https://www.internic.net/domain/named.root
+pihole_unbound_root_hints_path: /var/lib/unbound/root.hints
+
+pihole_unbound_config_directory: /etc/unbound/unbound.conf.d
+pihole_unbound_log_directory: /var/log/unbound
+pihole_unbound_port: 5335

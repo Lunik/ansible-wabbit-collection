@@ -1,0 +1,69 @@
+---
+
+- name: "App_cert | Define local facts | {{ x509_org_app_cert.common_name }}"
+  ansible.builtin.set_fact:
+    _x509_org_app_cert_path: "{{ x509_app_certificates_path }}/{{ x509_org_app_cert.common_name }}/{{ x509_org_app_cert.common_name }}"
+    _x509_org_app_ca: "{{ x509_org_intermediate_ca | selectattr('name', '==', x509_org_app_cert.ca) | first }}"
+
+- name: "App_cert | Create app cert directories | {{ x509_org_app_cert.common_name }}"
+  ansible.builtin.file:
+    path: "{{ _x509_org_app_cert_path }}"
+    mode: '0700'
+    state: directory
+
+- name: "App_cert | Generate app cert key | {{ x509_org_app_cert.common_name }}"
+  no_log: true
+  community.crypto.openssl_privatekey:
+    path: "{{ _x509_org_app_cert_path }}.key"
+    passphrase: "{{ x509_org_app_cert.key_passphrase }}"
+    size: "{{ x509_org_rsa_key_size }}"
+    cipher: auto
+    backup: true
+    mode: '0600'
+    state: present
+
+- name: "App_cert | Generate app cert csr | {{ x509_org_app_cert.common_name }}"
+  community.crypto.openssl_csr:
+    path: "{{ _x509_org_app_cert_path }}.csr"
+    privatekey_path: "{{ _x509_org_app_cert_path }}.key"
+    privatekey_passphrase: "{{ x509_org_app_cert.key_passphrase }}"
+    common_name: "{{ x509_org_app_cert.common_name | lower }}"
+    country_name: "{{ x509_org_country_name }}"
+    email_address: "{{ x509_org_email_address }}"
+    locality_name: "{{ x509_org_locality_name }}"
+    organization_name: "{{ x509_org_organization_name }}"
+    mode: '0600'
+    state: present
+
+- name: "App_cert | Check if app cert exists | {{ x509_org_app_cert.common_name }}"
+  ansible.builtin.stat:
+    path: "{{ _x509_org_app_cert_path }}.cert"
+  register: _x509_org_app_cert_stat
+
+- name: "App_cert | Check if app cert is expired | {{ x509_org_app_cert.common_name }}"
+  community.crypto.x509_certificate_info:
+    path: "{{ _x509_org_app_cert_path }}.cert"
+  register: _x509_org_app_cert_info
+  when: _x509_org_app_cert_stat.stat.exists
+
+- name: "App_cert | Generate app cert | {{ x509_org_app_cert.common_name }}"
+  community.crypto.x509_certificate:
+    path: "{{ _x509_org_app_cert_path }}.cert"
+    privatekey_path: "{{ _x509_org_app_cert_path }}.key"
+    privatekey_passphrase: "{{ x509_org_app_cert.key_passphrase }}"
+    csr_path: "{{ _x509_org_app_cert_path }}.csr"
+    provider: ownca
+    ownca_path: "{{ _x509_org_app_ca.cert_path }}"
+    ownca_privatekey_path: "{{ _x509_org_app_ca.key_path }}"
+    ownca_privatekey_passphrase: "{{ _x509_org_app_ca.key_passphrase }}"
+    ownca_not_after: "{{ x509_org_app_cert.expiration }}"
+    force: "{{ _x509_org_app_cert_stat.expired | default(false) }}"
+    mode: '0600'
+    backup: true
+    state: present
+
+- name: "App_cert | Generate app cert full PEM | {{ x509_org_app_cert.common_name }}"
+  ansible.builtin.template:
+    src: pem.j2
+    dest: "{{ _x509_org_app_cert_path }}.pem"
+    mode: '0600'

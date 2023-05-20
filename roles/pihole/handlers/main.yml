@@ -1,0 +1,39 @@
+---
+# handlers file for pihole
+
+- name: "Handlers | pihole | Cleanup install script"
+  delegate_to: localhost
+  ansible.builtin.file:
+    path: "{{ pihole_install_script_path }}"
+    state: absent
+
+- name: "Handlers | pihole | Restart unbound service"
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ pihole_unbound_service }}"
+    state: restarted
+
+- name: "Handlers | pihole | Restart FTL service"
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ pihole_ftl_service }}"
+    state: restarted
+
+- name: "Handlers | pihole | Restart lighttpd service"
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ pihole_lighttpd_service }}"
+    state: restarted
+
+- name: "Handlers | pihole | Restart DHCPCD service"
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ pihole_dhcpcd_service }}"
+    state: restarted
+
+
+- name: "Handlers | pihole | Update gravity"
+  become: true
+  ansible.builtin.command:
+    cmd: "{{ pihole_binary }} -g"
+  changed_when: true

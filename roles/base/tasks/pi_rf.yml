@@ -1,0 +1,29 @@
+---
+
+- name: "Pi_rf | Retreiv current device state"
+  ansible.builtin.command:
+    cmd: >
+      {{ base_pi_rfkill_bin }}
+      --output soft
+      --raw
+      --noheadings
+      list
+      {{ config | first }}
+  changed_when: false
+  loop: "{{ base_pi_rf_device_state.items() }}"
+  loop_control:
+    loop_var: config
+  register: _base_rf_device_state
+
+- name: "Pi_rf | Change device state"
+  become: true
+  ansible.builtin.command:
+    cmd: >
+      {{ base_pi_rfkill_bin }}
+      {{ state.config | last | replace('ed', '') }}
+      {{ state.config | first }}
+  changed_when: true
+  loop: "{{ _base_rf_device_state.results }}"
+  loop_control:
+    loop_var: state
+  when: state.stdout != (state.config | last)

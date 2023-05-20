@@ -1,0 +1,18 @@
+---
+
+- name: "Config | DHCP Leases | Template dnsmaq configs"
+  become: true
+  ansible.builtin.template:
+    src: "{{ config.src }}"
+    dest: "{{ config.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: "Handlers | pihole | Restart FTL service"
+  loop:
+    - src: pihole/dnsmasq/01-pihole-dhcp-custom-nameservce.conf.j2
+      dest: "{{ pihole_dnsmasq_config_directory }}/01-pihole-dhcp-custom-nameservce.conf"
+    - src: pihole/dnsmasq/04-pihole-static-dhcp.conf.j2
+      dest: "{{ pihole_dnsmasq_config_directory }}/04-pihole-static-dhcp.conf"
+  loop_control:
+    loop_var: config

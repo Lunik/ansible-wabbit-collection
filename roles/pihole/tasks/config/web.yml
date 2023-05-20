@@ -1,0 +1,63 @@
+---
+
+- name: "Config | Web | Check if password is correct"
+  ignore_errors: true
+  ansible.builtin.uri:
+    url: "http{{ pihole_https_enabled | ternary('s', '') }}://{{ pihole_hostname }}/{{ pihole_api_login }}"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      pw: "{{ pihole_webpassword }}"
+    status_code: 302
+    validate_certs: false
+  register: _pihole_test_auth
+
+- name: "Config | Web | Reset admin password"
+  become: true
+  no_log: true
+  ansible.builtin.command: >
+    "{{ pihole_binary }}"
+    admin
+    -p {{ pihole_webpassword }}
+  changed_when: true
+  when: _pihole_test_auth.failed
+
+- name: "Config | Web | Ensure HTTPS config"
+  when: pihole_https_enabled
+  block:
+    - name: "Config | Web | Create certificate directory"
+      become: true
+      ansible.builtin.file:
+        state: directory
+        path: "{{ pihole_cert_path | dirname }}"
+        mode: '0444'
+
+    - name: "Config | Web | Copy TLS PEM file"
+      become: true
+      ansible.builtin.copy:
+        src: "{{ pihole_https_pem_path }}"
+        dest: "{{ pihole_cert_path }}"
+        mode: '0440'
+        owner: root
+        group: "{{ pihole_webserver_group }}"
+      notify: "Handlers | pihole | Restart lighttpd service"
+
+    - name: "Config | Web | Copy CA cert file"
+      become: true
+      ansible.builtin.copy:
+        src: "{{ pihole_https_ca_path }}"
+        dest: "{{ pihole_ca_path }}"
+        mode: '0440'
+        owner: root
+        group: "{{ pihole_webserver_group }}"
+      notify: "Handlers | pihole | Restart lighttpd service"
+
+    - name: "Config | Web | Setup HTTPS configuration"
+      become: true
+      ansible.builtin.template:
+        src: lighttpd/tls.conf
+        dest: "{{ pihole_lighttpd_config_directory }}/conf-enabled/11-tls.conf"
+        owner: root
+        group: root
+        mode: '0644'
+      notify: "Handlers | pihole | Restart lighttpd service"

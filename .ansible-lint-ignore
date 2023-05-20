@@ -1,0 +1,9 @@
+roles/base/tasks/package.yml package-latest
+roles/base/tasks/package.yml no-handler
+roles/base/meta/main.yml schema[meta]
+roles/x509/meta/main.yml schema[meta]
+roles/x509/meta/main.yml meta-no-info
+roles/pihole/meta/main.yml meta-no-info
+roles/pihole/meta/main.yml schema[meta]
+roles/pihole/tasks/config/gravity.yml yaml[line-length]
+meta/runtime.yml meta-runtime[unsupported-version]

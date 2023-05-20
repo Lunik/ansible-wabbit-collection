@@ -1,0 +1,9 @@
+---
+
+- name: "Upgrade | Try to upgrade pihole"
+  become: true
+  ansible.builtin.command: |
+    {{ pihole_binary }}
+    updatePihole
+  register: _pihole_upgrade_result
+  changed_when: "'Everything is up to date' not in _pihole_upgrade_result.stdout"

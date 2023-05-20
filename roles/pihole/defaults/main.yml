@@ -1,0 +1,48 @@
+---
+# defaults file for pihole
+
+# Web config
+pihole_webpassword: password
+# Http config
+pihole_hostname: "{{ inventory_hostname }}"
+pihole_https_enabled: false
+# pihole_https_pem_path:
+# pihole_https_ca_path:
+
+# record_type => dnsmasq record_type
+pihole_dns_entries: []
+#  - type: ip
+#    domain: example.org
+#    ip: 127.0.0.1
+#  - type: custom
+#    record_type: cname
+#    domain: example.com
+#    target: example.org
+
+pihole_dhcp_enabled: false
+# pihole_dhcp_config:
+#   start: 192.168.42.5
+#   end: 192.168.42.35
+#   router: 192.168.42.1
+#   domain: local
+#   alt_domain_nameservers: 1.1.1.1
+pihole_dhcp_static_leases: []
+# - mac_addr: FF:FF:FF:FF:FF:FF
+#   ip: 127.0.0.1
+
+# pihole_static_ip:
+#   ip_address: 192.168.42.10
+#   subnet_mask: 24
+#   routers: 192.168.42.1
+#   domain_name_servers: 127.0.0.1
+
+# https://firebog.net
+pihole_adlists:
+  - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+
+pihole_gravity_comment: "Managed by Ansible"
+# https://docs.pi-hole.net/database/gravity/#domain-tables-domainlist
+# Add domain to the gravity database
+pihole_domainlist: []
+#  - domain: example.org
+#    type: 0

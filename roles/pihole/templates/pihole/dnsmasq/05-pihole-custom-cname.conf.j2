@@ -1,0 +1,5 @@
+{% for entry in pihole_dns_entries %}
+{% if entry.type == "custom" %}
+{{ entry.record_type }}={{ entry.domain | lower }},{{ entry.target | lower }}
+{% endif %}
+{% endfor %}

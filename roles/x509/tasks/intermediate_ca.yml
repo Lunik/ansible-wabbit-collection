@@ -1,0 +1,68 @@
+---
+
+- name: "Intermediate_ca | Create directories | {{ x509_org_intermediate_ca_cert.name }}"
+  ansible.builtin.file:
+    path: "{{ item | dirname }}"
+    mode: '0700'
+    state: directory
+  loop:
+    - "{{ x509_org_intermediate_ca_cert.key_path }}"
+    - "{{ x509_org_intermediate_ca_cert.cert_path }}"
+
+- name: "Intermediate_ca | Generate intermediate CA key | {{ x509_org_intermediate_ca_cert.name }}"
+  no_log: true
+  community.crypto.openssl_privatekey:
+    path: "{{ x509_org_intermediate_ca_cert.key_path }}"
+    passphrase: "{{ x509_org_intermediate_ca_cert.key_passphrase }}"
+    size: "{{ x509_org_rsa_key_size }}"
+    cipher: auto
+    backup: true
+    mode: '0600'
+    state: present
+
+- name: "Intermediate_ca | Generate intermediate CA csr | {{ x509_org_intermediate_ca_cert.name }}"
+  community.crypto.openssl_csr:
+    path: "{{ x509_org_intermediate_ca_cert.cert_path }}.csr"
+    privatekey_path: "{{ x509_org_intermediate_ca_cert.key_path }}"
+    privatekey_passphrase: "{{ x509_org_intermediate_ca_cert.key_passphrase }}"
+    common_name: "{{ x509_org_intermediate_ca_cert.name | lower }}.{{ x509_org_organization_name | lower }}"
+    country_name: "{{ x509_org_country_name }}"
+    email_address: "{{ x509_org_email_address }}"
+    locality_name: "{{ x509_org_locality_name }}"
+    organization_name: "{{ x509_org_organization_name }} {{ x509_org_intermediate_ca_cert.name }}"
+    basic_constraints_critical: true
+    basic_constraints:
+      - CA:TRUE
+      - pathlen:0
+    key_usage_critical: true
+    key_usage:
+      - keyCertSign
+    mode: '0600'
+    state: present
+
+- name: "Intermediate_ca | Check if intermediate CA cert exists | {{ x509_org_intermediate_ca_cert.name }}"
+  ansible.builtin.stat:
+    path: "{{ x509_org_intermediate_ca_cert.cert_path }}"
+  register: _x509_org_intermediate_ca_cert_stat
+
+- name: "Intermediate_ca | Check if intermediate cert CA is expired | {{ x509_org_intermediate_ca_cert.name }}"
+  community.crypto.x509_certificate_info:
+    path: "{{ x509_org_intermediate_ca_cert.cert_path }}"
+  register: _x509_org_intermediate_ca_cert_info
+  when: _x509_org_intermediate_ca_cert_stat.stat.exists
+
+- name: "Intermediate_ca | Generate intermediate CA cert | {{ x509_org_intermediate_ca_cert.name }}"
+  community.crypto.x509_certificate:
+    path: "{{ x509_org_intermediate_ca_cert.cert_path }}"
+    privatekey_path: "{{ x509_org_intermediate_ca_cert.key_path }}"
+    privatekey_passphrase: "{{ x509_org_intermediate_ca_cert.key_passphrase }}"
+    csr_path: "{{ x509_org_intermediate_ca_cert.cert_path }}.csr"
+    provider: ownca
+    ownca_path: "{{ x509_org_root_ca_cert_path }}"
+    ownca_privatekey_path: "{{ x509_org_root_ca_key_path }}"
+    ownca_privatekey_passphrase: "{{ x509_org_root_ca_key_passphrase }}"
+    ownca_not_after: "{{ x509_org_intermediate_ca_cert.cert_expiration }}"
+    force: "{{ _x509_org_intermediate_ca_cert_info.expired | default(false) }}"
+    mode: '0600'
+    backup: true
+    state: present

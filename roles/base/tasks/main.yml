@@ -1,0 +1,17 @@
+---
+# tasks file for base
+
+- name: "Main | Setup hostname"
+  become: true
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: "Main | Ensure system is up to date"
+  ansible.builtin.import_tasks: package.yml
+
+- name: "Main | Ensure SSH authentification"
+  ansible.builtin.import_tasks: ssh.yml
+
+- name: "Main | Ensure PI rf config"
+  ansible.builtin.import_tasks: pi_rf.yml
+  when: "'pi' in group_names"
