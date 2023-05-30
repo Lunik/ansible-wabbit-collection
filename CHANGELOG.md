@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.3
+
+- Role `pihole` : Enforce boolean format on DHCP enabled config
+
 ## 1.0.2
 
 - Fix doc files
