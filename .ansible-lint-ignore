@@ -6,7 +6,7 @@ roles/x509/meta/main.yml meta-no-info
 roles/pihole/meta/main.yml meta-no-info
 roles/pihole/meta/main.yml schema[meta]
 roles/pihole/tasks/config/gravity.yml yaml[line-length]
-meta/runtime.yml meta-runtime[unsupported-version
+meta/runtime.yml meta-runtime[unsupported-version]
 roles/base/tasks/package.yml var-naming[no-role-prefix]
 roles/base/tasks/pi_rf.yml var-naming[no-role-prefix]
 roles/pihole/tasks/install.yml var-naming[no-role-prefix]

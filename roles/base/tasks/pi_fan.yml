@@ -1,0 +1,17 @@
+---
+
+- name: "Pi_fan | Template fan control script"
+  become: true
+  ansible.builtin.template:
+    src: templates/fan_control.sh
+    dest: /root/fan_control.sh
+    owner: root
+    group: root
+    mode: '0744'
+
+- name: "Pi_fan | Setup cron"
+  become: true
+  ansible.builtin.cron:
+    name: "Manage Fan"
+    user: root
+    job: "/root/fan_control.sh >> /root/fan_control.log"

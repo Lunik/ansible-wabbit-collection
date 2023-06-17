@@ -15,3 +15,7 @@
 - name: "Main | Ensure PI rf config"
   ansible.builtin.import_tasks: pi_rf.yml
   when: "'pi' in group_names"
+
+- name: "Main | Ensure PI fan config"
+  ansible.builtin.import_tasks: pi_fan.yml
+  when: "'pi' in group_names and base_pi_fan.enabled"

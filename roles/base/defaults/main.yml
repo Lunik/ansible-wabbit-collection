@@ -21,3 +21,16 @@ base_pi_rf_device_state:
   wlan: blocked
   # Bluetooh
   bluetooth: blocked
+
+# Pi fan config
+# The remote server should be in an Ansible group named 'pi'
+# Exemple circuit : https://raspberrypi.stackexchange.com/a/105820
+base_pi_fan:
+  # Enable or disable the fan control
+  enabled: false
+  # GPIO pin number to control the fan
+  gpio_pin: 18
+  # Temperature in celsius to enable the fan
+  enable_temp: 50
+  # Temperature in celsius to disable the fan
+  disable_temp: 40
