@@ -1,0 +1,28 @@
+---
+
+- name: "Init | Check if IPFS is already initialized"
+  become: true
+  ansible.builtin.stat:
+    path: "{{ ipfs_config_path }}/config"
+  register: _ipfs_current_init
+
+- name: "Init | Initialize IPFS config directory"
+  become: true
+  ansible.builtin.file:
+    path: "{{ ipfs_config_path }}"
+    state: directory
+    owner: "{{ ipfs_system_user }}"
+    group: "{{ ipfs_system_group }}"
+    mode: "0750"
+
+- name: "Init | Initialize IPFS"
+  when: not _ipfs_current_init.stat.exists
+  block:
+    - name: "Init | Initialize IPFS"
+      become: true
+      become_user: "{{ ipfs_system_user }}"
+      ansible.builtin.shell: |
+        {{ ipfs_binary_path }} init --profile={{ ipfs_profile }}
+      environment:
+        IPFS_PATH: "{{ ipfs_config_path }}"
+      changed_when: true

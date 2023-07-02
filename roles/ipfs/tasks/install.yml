@@ -1,0 +1,71 @@
+---
+
+- name: "Main | Check if IPFS is already installed"
+  ansible.builtin.stat:
+    path: "{{ ipfs_binary_path }}_{{ ipfs_version }}"
+  register: _ipfs_current_install
+
+- name: "Main | Ensure IPFS install"
+  when: not _ipfs_current_install.stat.exists
+  block:
+    - name: "Main | Create install temporary directory"
+      ansible.builtin.tempfile:
+        state: directory
+      notify: "Handlers | Remove install temporary directory"
+      register: _ipfs_install_temp_dir
+
+    - name: "Main | Download IPFS archive"
+      ansible.builtin.get_url:
+        url: "{{ ipfs_archive_url[ansible_architecture] }}"
+        dest: "{{ _ipfs_install_temp_dir.path }}/ipfs.tar.gz"
+        mode: "0600"
+      register: _ipfs_archive
+
+    - name: "Main | Extract IPFS archive"
+      ansible.builtin.unarchive:
+        src: "{{ _ipfs_archive.dest }}"
+        dest: "{{ _ipfs_install_temp_dir.path }}"
+        remote_src: true
+      register: _ipfs_install
+
+    - name: "Main | Install IPFS"
+      become: true
+      ansible.builtin.copy:
+        src: "{{ _ipfs_install_temp_dir.path }}/kubo/ipfs"
+        dest: "{{ ipfs_binary_path }}_{{ ipfs_version }}"
+        mode: "0755"
+        owner: root
+        group: root
+        remote_src: true
+
+- name: "Main | Ensure IPFS symlink"
+  become: true
+  ansible.builtin.file:
+    src: "{{ ipfs_binary_path }}_{{ ipfs_version }}"
+    dest: "{{ ipfs_binary_path }}"
+    state: link
+    force: true
+    owner: root
+    group: root
+
+- name: "Main | Ensure IPFS init"
+  ansible.builtin.import_tasks: init.yml
+
+- name: "Main | Ensure IPFS systemd service"
+  become: true
+  ansible.builtin.template:
+    src: templates/ipfs.service
+    dest: "/etc/systemd/system/{{ ipfs_systemd_service }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  register: _ipfs_service_template
+  notify: "Handlers | Restart IPFS service"
+
+- name: "Handlers | Ensure IPFS service is started and enabled"
+  become: true
+  ansible.builtin.service:
+    name: "{{ ipfs_systemd_service }}"
+    enabled: true
+    daemon_reload: true
+    state: started

@@ -26,6 +26,7 @@ ansible-galaxy collection install lunik.wabbit
 - [Base](./roles/base/README.md)
 - [PiHole](./roles/pihole/README.md)
 - [x509](./roles/x509/README.md)
+- [IPFS](./roles/ipfs/README.md)
 
 ## Changelog
 

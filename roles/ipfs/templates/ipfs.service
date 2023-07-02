@@ -1,0 +1,14 @@
+[Unit] 
+Description=IPFS Daemon 
+After=network.target
+
+[Service]
+Type=simple
+Environment="IPFS_PATH={{ ipfs_config_path }}"
+ExecStart={{ ipfs_binary_path }} daemon --migrate=true --enable-gc=true
+User={{ ipfs_system_user }}
+Group={{ ipfs_system_group }}
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,22 @@
+---
+
+- name: "Handlers | Remove install temporary directory"
+  ansible.builtin.file:
+    path: "{{ _ipfs_install_temp_dir.path }}"
+    state: absent
+
+- name: "Handlers | Restart IPFS service"
+  become: true
+  ansible.builtin.service:
+    name: "{{ ipfs_systemd_service }}"
+    state: restarted
+    daemon_reload: true
+    enabled: true
+
+- name: "Handlers | Restart Gateway"
+  become: true
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+    daemon_reload: true
+    enabled: true

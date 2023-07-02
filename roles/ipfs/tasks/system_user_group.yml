@@ -1,0 +1,17 @@
+---
+
+- name: "System_user_group | Ensure IPFS group"
+  become: true
+  ansible.builtin.group:
+    name: "{{ ipfs_system_group }}"
+    state: present
+    system: true
+
+- name: "System_user_group | Ensure IPFS user"
+  become: true
+  ansible.builtin.user:
+    name: "{{ ipfs_system_user }}"
+    state: present
+    shell: /usr/sbin/nologin
+    system: true
+    group: "{{ ipfs_system_group }}"

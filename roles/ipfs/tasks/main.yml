@@ -1,0 +1,10 @@
+---
+
+- name: "Main | Ensure user&group"
+  ansible.builtin.import_tasks: system_user_group.yml
+
+- name: "Main | Ensure IPFS install"
+  ansible.builtin.import_tasks: install.yml
+
+- name: "Main | Ensure IPFS gateway"
+  ansible.builtin.import_tasks: gateway.yml

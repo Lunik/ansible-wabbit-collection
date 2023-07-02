@@ -1,0 +1,39 @@
+---
+
+- name: "Gateway | Install Nginx"
+  become: true
+  ansible.builtin.package:
+    name: nginx
+    state: present
+    update_cache: true
+
+- name: "Gateway | Ensure Nginx IPFS config"
+  become: true
+  ansible.builtin.template:
+    src: templates/ipfs.nginx.conf
+    dest: /etc/nginx/conf.d/ipfs.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - "Handlers | Restart Gateway"
+
+- name: "Gateway | Ensure Nginx started and enabled"
+  become: true
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    daemon_reload: true
+    enabled: true
+
+- name: "Gateway | Configure IPFS CORS"
+  become: true
+  become_user: "{{ ipfs_system_user }}"
+  ansible.builtin.shell: |
+    {{ ipfs_binary_path }} config --json API.HTTPHeaders.Access-Control-Allow-Origin '["http://{{ ipfs_gateway_hostname }}"]'
+    {{ ipfs_binary_path }} config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "POST"]'
+  environment:
+    IPFS_PATH: "{{ ipfs_config_path }}"
+  changed_when: true
+  notify:
+    - "Handlers | Restart IPFS service"

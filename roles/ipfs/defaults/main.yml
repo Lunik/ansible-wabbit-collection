@@ -1,0 +1,7 @@
+---
+
+ipfs_version: v0.20.0
+
+ipfs_profile: flatfs
+
+ipfs_gateway_hostname: ipfs.local

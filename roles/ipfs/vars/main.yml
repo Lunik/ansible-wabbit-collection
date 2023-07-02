@@ -1,0 +1,13 @@
+---
+
+ipfs_system_user: ipfs
+ipfs_system_group: ipfs
+
+ipfs_archive_url:
+  aarch64: https://dist.ipfs.tech/kubo/{{ ipfs_version }}/kubo_{{ ipfs_version }}_linux-arm64.tar.gz
+
+ipfs_binary_path: /usr/local/bin/ipfs
+
+ipfs_systemd_service: ipfs
+
+ipfs_config_path: /var/lib/ipfs

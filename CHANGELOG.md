@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.2.0
+
+- Role `ipfs`: Add IPFS role
+
 ## 1.1.0
 
 - Role `base` : Add Fan control through GPIO port for Raspberry Pi
