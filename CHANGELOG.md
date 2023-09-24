@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.3.0
+
+- Role `pihole` : Add cache TTL in the unbound config
+
 ## 1.2.0
 
 - Role `ipfs`: Add IPFS role
