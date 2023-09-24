@@ -14,3 +14,6 @@
 
 - name: "Config | Ensure custom DHCP leases"
   ansible.builtin.import_tasks: dhcp.yml
+
+- name: "Config | Prefetch DNS entries"
+  ansible.builtin.import_tasks: prefetch.yml

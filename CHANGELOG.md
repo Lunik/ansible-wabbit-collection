@@ -3,6 +3,7 @@
 ## 1.3.0
 
 - Role `pihole` : Add cache TTL in the unbound config
+- Role `pihole` : Add DNS prefetch script
 
 ## 1.2.0
 

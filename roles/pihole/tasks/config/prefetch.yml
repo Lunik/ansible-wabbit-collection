@@ -1,0 +1,18 @@
+---
+
+- name: "Config | Prefetch | Copy prefetch script"
+  become: true
+  ansible.builtin.copy:
+    src: files/pihole/dns_prefetch.sh
+    dest: "{{ pihole_config_directory }}/dns_prefetch.sh"
+    owner: "{{ pihole_system_user }}"
+    group: root
+    mode: '0770'
+
+- name: "Config | Prefetch | Ensure script is runned periodicaly with Cron"
+  become: true
+  ansible.builtin.cron:
+    user: "{{ pihole_system_user }}"
+    name: Prefetch DNS records
+    minute: "*/30"
+    job: "bash '{{ pihole_config_directory }}/dns_prefetch.sh'"
